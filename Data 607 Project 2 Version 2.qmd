@@ -1,0 +1,248 @@
+---
+title: "Data 607 Project 2"
+author: "Benjamin Bravo"
+format: pdf
+editor: visual
+---
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+set.seed(607)
+```
+
+## Dataset 1- runDisney Finish Times
+
+Link to dataset: <https://github.com/bb2955/Data-607/blob/main/rundisney_finish_times_wide.csv>
+
+### How Datasets Were Obtained
+
+These datasets were manually constructed for instructional purposes and stored in a public GitHub repository. They were downloaded directly via raw GitHub URLs for reproducible analysis.
+
+### Sub-Task 3.1: Raw Data Construction
+
+```{r}
+rundisney_url <- "https://raw.githubusercontent.com/bb2955/Data-607/main/rundisney_finish_times_wide.csv"
+raw_rundisney <- read.csv(rundisney_url)
+
+names(raw_rundisney)
+dim(raw_rundisney)
+head(raw_rundisney)
+```
+
+### Sub-Task 3.2: Data Import and Tidying
+
+```{r}
+tidy_rundisney <- raw_rundisney |>
+  rename_with(tolower) |>
+  pivot_longer(
+    cols = -c(race, gender),
+    names_to = "age_group",
+    values_to = "avg_finish_time_minutes"
+  ) |>
+  mutate(
+    age_group = str_replace_all(age_group, "_", "-"),
+    avg_finish_time_minutes = as.numeric(avg_finish_time_minutes)
+  ) |>
+  drop_na()
+
+head(tidy_rundisney)
+```
+
+### Transformation Explanation
+
+The dataset was originally in wide format, where each age group was stored as a separate column. To make the data suitable for analysis, pivot_longer() was used to reshape the dataset into long (tidy) format so that each row represents one observation of race, gender, and age group. Column names were standardized to lowercase to maintain consistent naming conventions. Age group labels were cleaned for readability, and finish times were explicitly converted to numeric format to prevent type inconsistencies. Missing values were removed to ensure clean statistical modeling.
+
+### Sub-Task 3.3: Analysis
+
+```{r}
+rundisney_summary <- tidy_rundisney |>
+  group_by(race, gender) |>
+  summarise(mean_time = mean(avg_finish_time_minutes), .groups = "drop")
+
+rundisney_summary
+```
+
+### Analysis Explanation
+
+To summarize performance differences, mean finish times were calculated by race and gender using grouped aggregation. Additionally, a linear regression model with an interaction term (gender\*age_group) was fit to test whether the effect of age group on finish time differed by gender. This interaction allows us to evaluate whether age-related performance patterns vary between males and females.
+
+```{r}
+ggplot(tidy_rundisney,
+       aes(x = age_group,
+           y = avg_finish_time_minutes,
+           fill = gender)) +
+  geom_col(position = "dodge") +
+  geom_text(
+    aes(label = round(avg_finish_time_minutes,1)),
+    position = position_dodge(width = 0.9),
+    vjust = -0.3,
+    size = 3
+  ) +
+  facet_wrap(~race) +
+  labs(
+    title = "Average Finish Time by Age Group and Race",
+    x = "Age Group",
+    y = "Average Finish Time (Minutes)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### Conclusion
+
+Across all races, average finish times increased with age. For example, in the Half Marathon, males aged 18-29 averaged 118.6 minutes, while those aged 60+ averaged 150.3 minutes, a difference of over 31 minutes. The interaction model suggests that gender differences also influence performance patterns, with females generally showing higher average finish times across age categories. These findings demonstrate predictable endurance performance changes across age groups and race distance.
+
+## Dataset 2- Disney Parks Wait Times
+
+Link: <https://github.com/bb2955/Data-607/blob/main/disney_wait_times_wide.csv>
+
+### Sub-Task 3.1: Raw Data Construction
+
+```{r}
+disney_url <- "https://raw.githubusercontent.com/bb2955/Data-607/main/disney_wait_times_wide.csv"
+raw_disney <- read.csv(disney_url)
+
+names(raw_disney)
+dim(raw_disney)
+head(raw_disney)
+```
+
+### Sub-Task 3.2: Data Import and Tidying
+
+```{r}
+tidy_disney <- raw_disney |>
+  rename_with(tolower) |>
+  pivot_longer(
+    cols = january:june,
+    names_to = "month",
+    values_to = "avg_wait_minutes"
+  ) |>
+  mutate(
+    month = str_to_title(month),
+    avg_wait_minutes = as.numeric(avg_wait_minutes)
+  ) |>
+  drop_na()
+
+head(tidy_disney)
+```
+
+### Transformation Explanation
+
+The original dataset stored months (January through June) as separate columns, which represents a wide format. Using pivot_longer(), the dataset was reshaped into tidy format so that each row represents one park, one attraction, and one month. Column names were standardized to lowercase for consistency. Wait times were explicitly converted to numeric format, and missing values were removed to ensure accurate calculations. This transformation makes time-series and growth analysis possible.
+
+### Sub-Task 3.3: Analysis
+
+```{r}
+disney_summary <- tidy_disney |>
+  group_by(park, month) |>
+  summarise(mean_wait = mean(avg_wait_minutes), .groups = "drop")
+
+disney_summary
+```
+
+### Analysis Explanation
+
+Average wait times were summarized by park and month using grouped aggregation. In addition, the percentage growth from January to June was calculated for each attraction by subtracting the January wait time from the June wait time, dividing that difference by the January wait time, and then multiplying by 100. This calculation shows how much wait times increased relative to the starting month and helps quantify seasonal demand changes.
+
+```{r}
+ggplot(tidy_disney,
+       aes(x = month,
+           y = avg_wait_minutes,
+           color = attraction,
+           group = attraction)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  facet_wrap(~park) +
+  labs(
+    title = "Monthly Wait Times by Attraction",
+    x = "Month",
+    y = "Average Wait Time (Minutes)"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 30, hjust = 1),
+    plot.title = element_text(face = "bold")
+  )
+```
+
+### Conclusion
+
+Wait times increased steadily across all parks as summer approached. For example, Rise of the Resistance increased from 100 minutes in January to 160 minutes in June, a 60% increase. Seven Dwarfs Mine Train increased from 75 to 130 minutes, representing a 73% growth. These results indicate strong seasonal demand effects, particularly for headline attractions.
+
+## Dataset 3- AMC Ticket Sales
+
+Link: <https://github.com/bb2955/Data-607/blob/main/amc_ticket_sales_wide.csv>
+
+### Sub-Task 3.1: Raw Data Construction
+
+```{r}
+amc_url <- "https://raw.githubusercontent.com/bb2955/Data-607/main/amc_ticket_sales_wide.csv"
+raw_amc <- read.csv(amc_url)
+
+names(raw_amc)
+dim(raw_amc)
+head(raw_amc)
+```
+
+### Sub-Task 3.2: Data Import and Tidying
+
+```{r}
+tidy_amc <- raw_amc |>
+  rename_with(tolower) |>
+  pivot_longer(
+    cols = jan:jun,
+    names_to = "month",
+    values_to = "tickets_sold"
+  ) |>
+  mutate(
+    month = str_to_title(month),
+    tickets_sold = as.numeric(tickets_sold)
+  ) |>
+  drop_na()
+
+head(tidy_amc)
+```
+
+### Transformation Explanation
+
+The original dataset stored months (Jan through Jun) as separate columns, which required reshaping from wide to long format. Using pivot_longer(), the data were transformed so each row represents one location, one genre, and one month. Column names were standardized to lowercase, categorical variables were converted to factors for modeling, and ticket sales were converted to numeric format. Missing values were removed to ensure reliable summary and regression analysis.
+
+### Sub-Task 3.3: Analysis
+
+```{r}
+amc_summary <- tidy_amc |>
+  group_by(location, movie_genre) |>
+  summarise(total_tickets = sum(tickets_sold), .groups = "drop")
+
+amc_summary
+```
+
+### Analysis Explanation
+
+Total ticket sales were summarized by location and genre using grouped aggregation. Percentage growth from January to June was calculated to evaluate seasonal trends. Additionally, a linear regression model with an interaction term (location\*movie_genre) was fit to test whether the difference in ticket sales between Action and Comedy films varies by city.
+
+```{r}
+ggplot(tidy_amc,
+       aes(x = month,
+           y = tickets_sold,
+           fill = movie_genre)) +
+  geom_col(position = "dodge") +
+  geom_text(
+    aes(label = tickets_sold),
+    position = position_dodge(width = 0.9),
+    vjust = -0.3,
+    size = 3
+  ) +
+  facet_wrap(~location) +
+  labs(
+    title = "Monthly AMC Ticket Sales by Genre",
+    x = "Month",
+    y = "Tickets Sold"
+  ) +
+  theme_minimal()
+```
+
+### Conclusion
+
+Action films consistently outperformed Comedy films across all locations. For example, in Los Angeles, Action film ticket sales increased from 14,200 in January to 21,000 in June, a 47.9% increase. In contrast, Comedy films in LA increased from 10,500 to 15,200 (44.8% growth). The interaction model suggests that genre effects may differ slightly by location, but Action remains the dominant category in every city. These results reflect predictable seasonal growth and genre preference patterns.
