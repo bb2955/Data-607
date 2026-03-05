@@ -1,0 +1,39 @@
+---
+title: "Data 607 Week 7"
+author: "Benjamin Bravo"
+format: html
+editor: visual
+---
+
+```{r}
+install.packages("rvest")
+install.packages("jsonlite")
+
+library(rvest)
+library(jsonlite)
+```
+
+```{r}
+html_page <- read_html("books.html")
+books_html <- html_page |> html_table(fill = TRUE)
+books_html <- books_html[[1]]
+```
+
+```{r}
+json_data <- fromJSON("books.json")
+books_json <- json_data$books
+books_json <- as.data.frame(books_json)
+```
+
+```{r}
+colnames(books_json) <- colnames(books_html)
+```
+
+```{r}
+books_html <- data.frame(lapply(books_html, as.character), stringsAsFactors = FALSE)
+books_json <- data.frame(lapply(books_json, as.character), stringsAsFactors = FALSE)
+```
+
+```{r}
+identical(books_html, books_json)
+```
