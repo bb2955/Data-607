@@ -1,0 +1,102 @@
+---
+title: "Assignment NY Times API"
+author: "Benjamin Bravo"
+format: pdf
+editor: visual
+---
+
+## Introduction
+
+The New York Times provides several public APIs that allow developers and analysts to access real-time news data. These APIs make it possible to explore trends in journalism, reader behavior, and popular topics using structured data.
+
+For this assignment, I used the New York Times Most Popular API, which returns articles that have received the highest engagement over a selected time period. This API is useful because it reflects what readers are actively interested in, rather than just what is being published.
+
+The specific endpoint used in this project is the “Most Viewed Articles (7 days)” endpoint. It returns a list of the most viewed articles on the New York Times website over the past week, along with information such as the article title, section, publication date, and author.
+
+## Research Question
+
+The goal of this analysis is to answer the following question:
+
+Which sections of the New York Times produce the most popular articles over the past 7 days?
+
+Understanding this can help identify what types of content readers engage with the most, such as news, opinion pieces, or world events.
+
+```{r}
+install.packages("httr")
+install.packages("jsonlite")
+install.packages("dplyr")
+install.packages("tibble")
+install.packages("ggplot2")
+
+library(httr)
+library(jsonlite)
+library(dplyr)
+library(tibble)
+library(ggplot2)
+```
+
+```{r}
+Sys.setenv(NYT_API_KEY = "fJL80tDwpS9vIE3GP37oCrXN8yXFTAO9ny2Ns0crJQKJjHyM")
+
+api_key <- Sys.getenv("NYT_API_KEY")
+```
+
+```{r}
+url <- paste0(
+  "https://api.nytimes.com/svc/mostpopular/v2/viewed/7.json?api-key=",
+  api_key
+)
+```
+
+```{r}
+response <- GET(url)
+```
+
+```{r}
+data_text <- content(response, "text", encoding = "UTF-8")
+```
+
+```{r}
+data_json <- fromJSON(data_text)
+```
+
+```{r}
+articles <- data_json$results
+```
+
+```{r}
+articles_clean <- articles %>%
+  select(title, section, published_date, byline, url) %>%
+  as_tibble()
+
+articles_clean
+```
+
+```{r}
+section_counts <- articles_clean %>%
+  count(section, sort = TRUE)
+
+section_counts
+```
+
+```{r}
+ggplot(section_counts, aes(x = reorder(section, n), y = n)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "NYT Most Viewed Articles by Section (Last 7 Days)",
+    x = "Section",
+    y = "Number of Articles"
+  ) +
+  theme_minimal()
+```
+
+## Conclusion
+
+In this project, I used the New York Times Most Popular API to explore which sections of the New York Times produced the most popular articles over the past 7 days. This connects directly to my research question and also supports the idea introduced at the beginning of the project that APIs can be used to better understand reader interest and popular news topics. To complete this analysis, I made a request to the Most Viewed Articles (7 days) endpoint using my API key stored as an environment variable, which allowed me to safely access the data without hard coding the key into my document.
+
+After retrieving the data, I parsed the JSON response and transformed it into a clean tidy data frame in R. I selected only the columns that were most useful for the analysis, including the article title, section, publication date, author, and URL. Some other fields returned by the API were not needed for this project, so they were excluded to keep the dataset simpler and easier to work with. I then grouped the articles by section and counted how often each section appeared in the list of most viewed articles.
+
+The results showed that the U.S. section appeared far more often than any other section, while sections such as World, Well, Technology, Opinion, New York, Magazine, and Business appeared much less frequently. This suggests that during the 7-day period included in this API response, articles related to U.S. news attracted the highest reader attention. This directly answers the research question by showing which section was most represented among the most popular articles.
+
+Overall, this assignment demonstrated how an API can be used in R to collect, clean, organize, and analyze real-world data. It also showed how structured data from a news source can be used to answer a meaningful question about reader behavior and article popularity in a simple and clear way.
