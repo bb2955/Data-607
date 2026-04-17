@@ -1,0 +1,80 @@
+---
+title: "Assignment 10A"
+author: "Benjamin Bravo"
+format: pdf
+editor: visual
+---
+## Approach
+
+In this assignment, I will reproduce and extend the sentiment analysis example from Chapter 2 of Text Mining with R. The goal is to use text mining techniques in R to measure sentiment, or emotional tone, within written text. I will first recreate the original example using Jane Austen novels and standard sentiment lexicons such as Bing and NRC. This will confirm that the code runs correctly in a Quarto file and matches the concepts shown in the book.
+
+After reproducing the original example, I will extend the analysis in two ways. First, I will use a different text corpus by focusing on Pride & Prejudice instead of all Jane Austen books. This will allow me to compare sentiment results from one novel versus a larger collection of texts. Second, I will add another sentiment lexicon, AFINN, which uses numeric sentiment scores instead of simple positive and negative labels. This will provide a different way to measure tone in the text.
+
+One data challenge I foresee is that words can have different meanings depending on context. A sentiment lexicon may label a word as negative or positive even when the meaning in the story is neutral. Another challenge is that older literature often uses language differently than modern writing, which may affect how words are scored. I also expect that removing punctuation and splitting text into single words may lose some meaning from phrases or sarcasm. Despite these limitations, sentiment analysis can still provide useful patterns and comparisons across texts.
+
+
+```{r}
+install.packages("tidyverse")
+install.packages("tidytext")
+install.packages("janeaustenr")
+install.packages("textdata")
+
+library(tidyverse)
+library(tidytext)
+library(janeaustenr)
+library(textdata)
+
+```
+
+```{r}
+books <- austen_books()
+
+words <- books %>%
+  unnest_tokens(word, text)
+
+head(words)
+```
+
+```{r}
+bing <- get_sentiments("bing")
+
+words %>%
+  inner_join(bing, by = "word") %>%
+  count(sentiment)
+```
+
+```{r}
+words %>%
+  inner_join(get_sentiments("nrc"), by = "word") %>%
+  count(sentiment)
+```
+
+```{r}
+pp <- austen_books() %>%
+  filter(book == "Pride & Prejudice") %>%
+  unnest_tokens(word, text)
+
+head(pp)
+```
+
+```{r}
+pp %>%
+  inner_join(bing, by = "word") %>%
+  count(sentiment)
+```
+
+```{r}
+afinn <- get_sentiments("afinn")
+
+pp %>%
+  inner_join(afinn, by = "word") %>%
+  summarise(Average_Score = mean(value))
+```
+
+## Citation
+
+Silge, J., & Robinson, D. (2017). Text Mining with R: A Tidy Approach. O'Reilly Media.   https://www.tidytextmining.com/
+
+## Conclusion
+
+This assignment showed that sentiment analysis is a useful way to measure emotion in text. The results changed depending on both the text being analyzed and the lexicon that was used. Using all Jane Austen books gave a wider view of sentiment, while using only Pride and Prejudice focused on one story. The Bing lexicon grouped words as positive or negative, while AFINN gave numeric scores for more detail. Overall, this project shows that sentiment analysis can provide different insights based on the dataset and dictionary selected.
