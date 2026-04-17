@@ -1,0 +1,14 @@
+---
+title: "Assignment 10B"
+author: "Benjamin Bravo"
+format: pdf
+editor: visual
+---
+
+## Approach
+
+In this assignment, I will use the Nobel Prize public API to collect JSON data and study patterns in Nobel Prize awards and winners. The main goal is to practice working with JSON data in R by importing the data, organizing it into clean tables, and answering four interesting questions. These questions may focus on prize categories, countries, years, and information about the winners.
+
+To complete the assignment, I will first use R packages such as `jsonlite`, `httr`, and `tidyverse` to connect to the API and load the JSON data. Since JSON data is often nested and not ready for analysis, I will clean and organize it into tidy data frames. I may create separate tables for prizes, winners, and countries, then combine them when needed. After the data is cleaned, I will write four questions that can be answered using tables, summaries, filtering, comparisons, or charts. At least one question will go beyond simple counting and will require joining or comparing different parts of the data.
+
+One challenge I expect is that JSON data can be messy and contain missing values. Some winners may have more than one country, shared prizes, or incomplete personal information. Another challenge is that country names may change over time, which can make comparisons harder. I will also need to make sure duplicate rows are handled correctly when prizes are split between multiple winners. Even with these challenges, this assignment will be a good way to practice turning web data into useful information with R.
