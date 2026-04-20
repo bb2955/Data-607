@@ -1,0 +1,66 @@
+---
+title: "Data 607- Discussion 11"
+author: "Benjamin Bravo"
+format: pdf
+editor: visual
+---
+
+For this assignment, I selected Amazon.com as the recommender system to analyze. Amazon is one of the most recognized examples of recommendation systems because it suggests products throughout the website, including the homepage, product pages, shopping cart, and through email. These recommendations help users discover products while also helping Amazon increase sales and customer engagement.\
+\
+This report uses the Scenario Design method. Instead of only focusing on system features, Scenario Design focuses on what goals users are trying to achieve. \
+\
+\## Scenario Design\
+\
+Scenario Design is a method used to improve user experience by focusing on user goals. Instead of asking what features should be added, it asks what people are trying to accomplish. This approach helps organizations build systems that are more useful, practical, and customer-friendly.\
+\
+The three main questions are: What goals are users trying to achieve? What behaviors matter most? What type of experience should the system create? These questions are used in the analysis below.\
+\
+\## Scenario Design for Amazon \
+\
+\## 1. What goals is Amazon trying to achieve?\
+\
+Amazon is likely trying to increase sales, improve customer satisfaction, and encourage repeat visits. When customers receive helpful recommendations, they may be more likely to purchase products and return to the website again in the future. Amazon also wants shopping to feel personalized so users feel that the website understands their needs. In addition, recommendations help users discover products they may not have searched for directly, which can lead to more purchases.\
+\
+\## 2. What behaviors matter most to Amazon?\
+\
+Amazon likely values behaviors such as clicks, purchases, search activity, browsing history, ratings, reviews, and add-to-cart actions. These behaviors give Amazon useful data about customer interests. Repeat visits and time spent on the website are also important because they show customer engagement. By tracking these actions, Amazon can improve recommendation quality over time.\
+\
+\## 3. What experience does Amazon want to create?\
+\
+Amazon likely wants to create a shopping experience that feels fast, simple, and personalized. Customers should feel that they can quickly find what they need without wasting time searching through too many products. Recommendations should feel helpful rather than intrusive. If the experience is smooth and convenient, customers are more likely to trust the site and continue shopping.\
+\
+\# Scenario Design for Customers\
+\
+\## 1. What goals are customers trying to achieve?\
+\
+Customers usually want to find the right product quickly and with little effort. They may also want to compare similar items, discover useful products, and feel confident before making a purchase. Many customers shop online because it saves time, so recommendations that reduce search effort can be valuable. Customers also want suggestions that match their interests instead of random or irrelevant products.\
+\
+\## 2. What behaviors matter most to customers?\
+\
+Customers care about behaviors that help them complete shopping goals. This includes searching for products, reading reviews, comparing items, saving products for later, and purchasing items that fit their needs. Customers may also ignore poor recommendations or remove items from their browsing history if they are not relevant. These behaviors help users make better decisions and improve future recommendations.\
+\
+\## 3. What experience should customers receive?\
+\
+Customers want recommendations that are relevant, easy to understand, and useful. They want suggestions that help them save time and discover products they may actually need. Recommendations should not feel repetitive or annoying. Customers also want some control, such as being able to remove unwanted suggestions or understand why a product was recommended.\
+\
+\## Reverse Engineering Amazon's Recommendation System\
+\
+Based on Amazon’s website and public information, we can make educated guesses about how the recommendation system works. Amazon likely uses purchase history, browsing history, search activity, ratings, cart items, and similar customer behavior. The website shows many different recommendation areas, which suggests Amazon uses multiple recommendation models instead of only one system.\
+\
+For example, sections like “Customers who bought this item also bought” likely rely on purchase patterns between products. Sections such as “Inspired by your browsing history” likely depend more on recent clicks and browsing behavior. Shopping cart recommendations probably focus on accessories or complementary products. This suggests Amazon changes recommendation logic depending on where the user is on the website.\
+\
+Amazon’s recommendation system is strong because it is used across the full shopping experience. It helps users discover products, increases additional purchases, and works well with a very large product catalog. However, the system may also face challenges such as repetitive suggestions, misunderstanding gift purchases, limited explanations, and weaker recommendations for new users with little history.\
+\
+\# Recommendations for Improvement\
+\
+Amazon already has a strong recommender system, but there are several ways it could improve. First, Amazon could provide clearer explanations such as “Recommended because you viewed this item” or “Recommended because you bought a similar product.” This would improve trust and transparency.\
+\
+Second, Amazon could offer a gift mode or shopping mode where users can choose whether they are shopping for themselves, work, family, or as a gift. This would reduce confusion caused by one-time purchases. Third, Amazon could increase recommendation variety so users do not always see similar items repeatedly. Showing a mix of familiar and new products may improve discovery.\
+\
+Amazon could also give users more control by allowing them to choose preferences such as budget products, premium products, or new discoveries. Finally, Amazon could improve feedback options by letting users mark recommendations as not relevant, wrong category, or already purchased elsewhere. This would help improve future recommendations.\
+\
+\# Conclusion\
+\
+Amazon is one of the best examples of a recommender system because recommendations are built into many parts of the shopping experience. Scenario Design shows that successful systems must meet both business goals and customer goals. Amazon wants higher sales, customer retention, and personalization, while customers want speed, convenience, and relevant product suggestions.\
+\
+Amazon’s recommendation system is already effective, but it could improve by becoming more transparent, offering better user controls, and increasing recommendation variety. When recommendation systems balance business value with customer needs, they create a stronger overall user experience.
