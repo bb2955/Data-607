@@ -1,0 +1,177 @@
+---
+title: "Data 607 Project 4"
+author: "Benjamin Bravo"
+date: "2026-04-21"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Approach
+
+For this assignment, I would begin by choosing a labeled dataset of spam and ham emails, such as the Apache SpamAssassin dataset. Since the emails are already labeled, this makes it easier to train a model to recognize patterns in spam versus non-spam messages. First, I would load the emails into R and organize them into a dataset with two categories: spam and ham.
+
+Next, I would clean the text data so it can be analyzed properly. This would include converting all words to lowercase, removing punctuation, numbers, extra spaces, and common words such as “the” or “and.” After cleaning the text, I would turn the emails into numbers using methods like a document-term matrix or TF-IDF so the computer can measure word importance.
+
+Then, I would split the dataset into a training set and a testing set. The training set would be used to teach the model how spam and ham emails differ. The testing set would be used afterward to see how well the model can classify new emails it has never seen before. I would likely test models such as Naive Bayes or Logistic Regression because they are commonly used for text classification.
+
+To measure success, I would use accuracy, precision, recall, and a confusion matrix. These results would show how often the model correctly identifies spam and how often it mistakes regular emails for spam.
+
+Some data challenges I may encounter include messy email text, special characters, HTML formatting, and duplicate emails. Another challenge is that spam emails may use unusual spellings or symbols to avoid detection. Some words may also appear in both spam and ham emails, making classification harder. I may also face unbalanced data if there are many more spam emails than ham emails or vice versa. To handle these issues, I would carefully clean the data, remove duplicates, and test different models to improve performance.
+
+Link: https://spamassassin.apache.org/old/publiccorpus/
+
+## Code
+
+```{r}
+install.packages(c("tm", "e1071", "caret"))
+
+library(tm)
+library(e1071)
+library(caret)
+```
+```{r}
+install.packages("dplyr")
+
+library("dplyr")
+```
+
+
+
+```{r}
+dir.create("spam_data", showWarnings = FALSE)
+
+download.file(
+  "https://spamassassin.apache.org/old/publiccorpus/20021010_easy_ham.tar.bz2",
+  "spam_data/easy_ham.tar.bz2"
+)
+
+download.file(
+  "https://spamassassin.apache.org/old/publiccorpus/20021010_spam.tar.bz2",
+  "spam_data/spam.tar.bz2"
+)
+
+untar("spam_data/easy_ham.tar.bz2", exdir = "spam_data")
+untar("spam_data/spam.tar.bz2", exdir = "spam_data")
+```
+```{r}
+read_emails <- function(folder, label) {
+  files <- list.files(folder, full.names = TRUE)
+  
+  text <- sapply(files, function(x) {
+    lines <- readLines(x, warn = FALSE, encoding = "latin1")
+    lines <- iconv(lines, from = "latin1", to = "UTF-8", sub = "")
+    paste(lines, collapse = " ")
+  })
+  
+  data.frame(text = text, class = label, stringsAsFactors = FALSE)
+}
+
+ham <- read_emails("spam_data/easy_ham", "ham")
+spam <- read_emails("spam_data/spam", "spam")
+
+emails <- rbind(ham, spam)
+emails$class <- as.factor(emails$class)
+```
+
+
+```{r}
+emails$text <- iconv(emails$text, from = "UTF-8", to = "UTF-8", sub = "")
+```
+
+
+```{r}
+corpus <- VCorpus(VectorSource(emails$text))
+
+corpus <- tm_map(corpus, content_transformer(tolower))
+corpus <- tm_map(corpus, removePunctuation)
+corpus <- tm_map(corpus, removeNumbers)
+corpus <- tm_map(corpus, removeWords, stopwords("english"))
+corpus <- tm_map(corpus, stripWhitespace)
+```
+
+```{r}
+dtm <- DocumentTermMatrix(corpus)
+```
+
+```{r}
+dtm <- removeSparseTerms(dtm, 0.995)
+
+freq_terms <- findFreqTerms(dtm, lowfreq = 5)
+dtm <- dtm[, freq_terms]
+```
+
+```{r}
+convert_counts <- function(x) {
+  ifelse(x > 0, "Yes", "No")
+}
+
+data <- as.data.frame(as.matrix(dtm))
+data[] <- lapply(data, convert_counts)
+data$class <- emails$class
+```
+
+```{r}
+data$class <- emails$class
+```
+
+
+```{r}
+colnames(data) <- make.names(colnames(data))
+```
+
+```{r}
+set.seed(123)
+
+spam_data <- data[data$class == "spam", ]
+ham_data  <- data[data$class == "ham", ]
+
+n <- min(nrow(spam_data), nrow(ham_data))
+
+spam_sample <- spam_data[sample(1:nrow(spam_data), n), ]
+ham_sample  <- ham_data[sample(1:nrow(ham_data), n), ]
+
+balanced_data <- rbind(spam_sample, ham_sample)
+balanced_data$class <- as.factor(balanced_data$class)
+
+table(balanced_data$class)
+```
+
+```{r}
+set.seed(123)
+
+train_index <- createDataPartition(
+  balanced_data$class,
+  p = 0.7,
+  list = FALSE
+)
+
+train_data <- balanced_data[train_index, ]
+test_data <- balanced_data[-train_index, ]
+```
+
+
+
+```{r}
+model <- naiveBayes(class ~ ., data = train_data)
+```
+
+```{r}
+predictions <- predict(model, test_data)
+```
+
+```{r}
+confusionMatrix(predictions, test_data$class, positive = "spam")
+```
+This project was about building a model to tell whether an email is spam or not spam (ham). I used the Apache SpamAssassin dataset, which already has emails labeled as spam or ham. First, I downloaded and loaded the emails into R. While reading the files, I made sure to fix any encoding issues because emails can contain strange characters or formatting. Each email was stored along with its correct label so the model could learn from it.
+
+Next, I cleaned the text so it would be easier to analyze. I converted all words to lowercase, removed punctuation and numbers, and removed common words like “the” and “and” that do not add much meaning. I also removed extra spaces. After cleaning, I turned the text into numbers using a document-term matrix. This means each email became a row and each word became a column, showing whether the word appeared in that email. I also removed very rare words so the model would focus only on important words.
+
+Since the Naive Bayes model works better with simple inputs, I changed the word counts into “Yes” or “No” values to show if a word appeared in an email. I then added the spam or ham label back to the dataset. Because there were more ham emails than spam emails, I balanced the dataset by taking an equal number of spam and ham emails. This helps prevent the model from favoring one group too much. After that, I split the data into a training set and a testing set. The training set was used to teach the model, and the testing set was used to check how well it worked on new data.
+
+I used a Naive Bayes model to learn the patterns between words and whether an email is spam or ham. After training the model, I tested it and used a confusion matrix to measure how well it performed. This showed how many emails were classified correctly and incorrectly.
+
+## Conclusion
+
+In conclusion, this project shows that a simple model can perform extremely well when the data is prepared correctly. By carefully cleaning the text, removing unnecessary words, selecting useful features, and balancing the dataset, the Naive Bayes model was able to accurately distinguish between spam and ham emails. The final results show that the model made almost no mistakes, correctly identifying nearly all emails in the test set. This demonstrates that preprocessing and data preparation are just as important as the model itself. Overall, this project highlights how effective text classification can be, even with a straightforward method, when the right steps are followed.
+
